@@ -1,11 +1,14 @@
 package tn.esprit.autoloc.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
+@Table(name = "paiement")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,4 +24,9 @@ public class Paiement {
 
     @Enumerated(EnumType.STRING)
     private ModePaiement modePaiement;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "contrat_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Contrat contrat;
 }
