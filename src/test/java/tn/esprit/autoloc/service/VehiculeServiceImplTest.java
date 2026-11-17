@@ -3,6 +3,8 @@ package tn.esprit.autoloc.service;
 import org.junit.jupiter.api.Test;
 import tn.esprit.autoloc.calcul.*;
 import tn.esprit.autoloc.domain.Vehicule;
+import tn.esprit.autoloc.repository.IAgenceRepository;
+import tn.esprit.autoloc.repository.IEquipementRepository;
 import tn.esprit.autoloc.repository.IVehiculeRepository;
 
 import java.math.BigDecimal;
@@ -26,7 +28,8 @@ class VehiculeServiceImplTest {
     }
 
     private VehiculeServiceImpl service(Map<String, OffreTarifStrategy> strategies) {
-        return new VehiculeServiceImpl(mock(IVehiculeRepository.class), strategies);
+        return new VehiculeServiceImpl(mock(IVehiculeRepository.class),
+                mock(IAgenceRepository.class), mock(IEquipementRepository.class), strategies);
     }
 
     private Vehicule vehicule(String tarif) {

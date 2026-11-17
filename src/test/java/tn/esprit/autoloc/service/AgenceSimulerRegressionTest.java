@@ -11,6 +11,7 @@ import tn.esprit.autoloc.io.BasicRapport;
 import tn.esprit.autoloc.io.ConsoleRapportDecorator;
 import tn.esprit.autoloc.io.RapportFactory;
 import tn.esprit.autoloc.repository.IAgenceRepository;
+import tn.esprit.autoloc.repository.IEquipementRepository;
 import tn.esprit.autoloc.repository.IVehiculeRepository;
 
 import java.math.BigDecimal;
@@ -49,7 +50,8 @@ class AgenceSimulerRegressionTest {
         // calculTarif réel (VehiculeServiceImpl) : c'est lui qu'on veut vérer
         BasicRapport basic = new BasicRapport();
         RapportFactory factory = new RapportFactory(basic, new ConsoleRapportDecorator(basic));
-        VehiculeServiceImpl vehiculeService = new VehiculeServiceImpl(vehiculeRepo, Map.of(
+        VehiculeServiceImpl vehiculeService = new VehiculeServiceImpl(vehiculeRepo,
+                mock(IAgenceRepository.class), mock(IEquipementRepository.class), Map.of(
                 "STANDARD", new StandardOffreStrategy(),
                 "WEEKEND", new WeekendOffreStrategy(),
                 "LONGUE_DUREE", new LongueDureeOffreStrategy()));
