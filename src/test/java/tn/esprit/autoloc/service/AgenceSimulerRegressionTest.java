@@ -1,7 +1,10 @@
 package tn.esprit.autoloc.service;
 
 import org.junit.jupiter.api.Test;
+import tn.esprit.autoloc.calcul.LongueDureeOffreStrategy;
+import tn.esprit.autoloc.calcul.StandardOffreStrategy;
 import tn.esprit.autoloc.calcul.VehiculeOffre;
+import tn.esprit.autoloc.calcul.WeekendOffreStrategy;
 import tn.esprit.autoloc.domain.Agence;
 import tn.esprit.autoloc.domain.Vehicule;
 import tn.esprit.autoloc.io.BasicRapport;
@@ -12,6 +15,7 @@ import tn.esprit.autoloc.repository.IVehiculeRepository;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,7 +49,11 @@ class AgenceSimulerRegressionTest {
         // calculTarif réel (VehiculeServiceImpl) : c'est lui qu'on veut vérer
         BasicRapport basic = new BasicRapport();
         RapportFactory factory = new RapportFactory(basic, new ConsoleRapportDecorator(basic));
-        return new AgenceServiceImpl(agenceRepo, new VehiculeServiceImpl(vehiculeRepo), factory);
+        VehiculeServiceImpl vehiculeService = new VehiculeServiceImpl(vehiculeRepo, Map.of(
+                "STANDARD", new StandardOffreStrategy(),
+                "WEEKEND", new WeekendOffreStrategy(),
+                "LONGUE_DUREE", new LongueDureeOffreStrategy()));
+        return new AgenceServiceImpl(agenceRepo, vehiculeService, factory);
     }
 
     @Test

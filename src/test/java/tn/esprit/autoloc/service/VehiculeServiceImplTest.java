@@ -22,7 +22,7 @@ class VehiculeServiceImplTest {
         return Map.of(
                 "STANDARD", new StandardOffreStrategy(),
                 "WEEKEND", new WeekendOffreStrategy(),
-                "LONGUE_DUREE", new LongueDureeStrategy());
+                "LONGUE_DUREE", new LongueDureeOffreStrategy());
     }
 
     private VehiculeServiceImpl service(Map<String, OffreTarifStrategy> strategies) {

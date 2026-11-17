@@ -1,15 +1,23 @@
 package tn.esprit.autoloc.service;
 
 import org.springframework.stereotype.Service;
+import tn.esprit.autoloc.calcul.OffreTarifStrategy;
+import tn.esprit.autoloc.calcul.VehiculeOffre;
 import tn.esprit.autoloc.domain.Vehicule;
 import tn.esprit.autoloc.repository.IVehiculeRepository;
-import tn.esprit.autoloc.calcul.VehiculeOffre;
+
+import java.util.Map;
 
 @Service
 public class VehiculeServiceImpl extends GenericServiceImpl<Vehicule, Long> implements IVehiculeService {
 
-    public VehiculeServiceImpl(IVehiculeRepository repository) {
+    /** Stratégies injectées par Spring, clés = noms des beans = constantes de l'enum (etape 16). */
+    private final Map<String, OffreTarifStrategy> strategies;
+
+    public VehiculeServiceImpl(IVehiculeRepository repository,
+                               Map<String, OffreTarifStrategy> strategies) {
         super(repository);
+        this.strategies = strategies;
     }
 
     @Override
@@ -34,18 +42,13 @@ public class VehiculeServiceImpl extends GenericServiceImpl<Vehicule, Long> impl
     }
     @Override
     public double calculTarif(Vehicule vehicule, int jours, VehiculeOffre offre) {
-        double tarifJour = vehicule.getTarifJournalier().doubleValue();
-        double total;
-        switch (offre) {
-            case WEEKEND -> total = tarifJour * 0.80 * jours;       // tarif journalier -20 %
-            case LONGUE_DUREE -> {
-                total = tarifJour * 0.75 * jours;                   // tarif journalier -25 %
-                if (total > 2000) {
-                    total = total * 0.95;                           // -5 % si le total dépasse 2000
-                }
-            }
-            default -> total = tarifJour * jours;                   // STANDARD
+        if (offre == null) {
+            throw new IllegalArgumentException("Offre obligatoire");
         }
-        return total;
+        OffreTarifStrategy strategy = strategies.get(offre.name());
+        if (strategy == null) {
+            throw new IllegalArgumentException("Aucune stratégie de tarif pour l'offre " + offre.name());
+        }
+        return strategy.calculer(vehicule, jours);
     }
 }
