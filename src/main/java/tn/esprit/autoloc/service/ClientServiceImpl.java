@@ -6,17 +6,34 @@ import tn.esprit.autoloc.domain.Client;
 import tn.esprit.autoloc.repository.IClientRepository;
 
 @Service
-public class ClientServiceImpl extends AbstractCrudService<Client> implements IClientService {
+public class ClientServiceImpl extends GenericServiceImpl<Client, Long> implements IClientService {
 
     public ClientServiceImpl(IClientRepository repository) {
-        super(repository, "Client", Client::getIdClient);
+        super(repository);
     }
 
     @Override
-    public Client add(Client client) {
-        if (!Utils.isNotEmpty(client.getNom())) {
-            throw new IllegalArgumentException("Le nom du client est obligatoire");
-        }
-        return super.add(client);
+    protected String getEntityName() {
+        return "Client";
+    }
+
+    @Override
+    protected Long getId(Client entity) {
+        return entity.getIdClient();
+    }
+
+    @Override
+    protected void setFields(Client source, Client target) {
+        target.setNom(source.getNom());
+        target.setPrenom(source.getPrenom());
+        target.setEmail(source.getEmail());
+        target.setTelephone(source.getTelephone());
+        target.setNumPermis(source.getNumPermis());
+        target.setDateInscription(source.getDateInscription());
+    }
+
+    @Override
+    public boolean check(Client client, boolean isNew) {
+        return client != null && Utils.isNotEmpty(client.getNom());
     }
 }

@@ -9,10 +9,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import tn.esprit.autoloc.domain.Agence;
-import tn.esprit.autoloc.exception.GlobalExceptionHandler;
 import tn.esprit.autoloc.exception.ResourceNotFoundException;
 import tn.esprit.autoloc.service.IAgenceService;
+import tn.esprit.autoloc.web.GlobalExceptionHandler;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -35,12 +36,15 @@ class AgenceControllerTest {
 
     @Test
     void get_unknownId_returns404WithMessage() throws Exception {
-        when(service.retrieve(99L)).thenThrow(new ResourceNotFoundException("Agence", "99"));
+        when(service.findById(99L)).thenThrow(new ResourceNotFoundException("Agence", "99"));
 
-        mvc.perform(get("/api/agences/99"))
+        mvc.perform(get("/agences/99"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.message").value("Agence introuvable avec l'id 99"));
+                .andExpect(jsonPath("$.error").value("Not Found"))
+                .andExpect(jsonPath("$.message").value("Agence introuvable avec l'id 99"))
+                .andExpect(jsonPath("$.path").value("/agences/99"))
+                .andExpect(jsonPath("$.timestamp").exists());
     }
 
     @Test
@@ -48,9 +52,9 @@ class AgenceControllerTest {
         Agence saved = new Agence();
         saved.setIdAgence(1L);
         saved.setNom("Tunis Centre");
-        when(service.add(any(Agence.class))).thenReturn(saved);
+        when(service.create(any(Agence.class))).thenReturn(saved);
 
-        mvc.perform(post("/api/agences")
+        mvc.perform(post("/agences")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"nom\":\"Tunis Centre\",\"ville\":\"Tunis\"}"))
                 .andExpect(status().isCreated())
@@ -60,20 +64,24 @@ class AgenceControllerTest {
 
     @Test
     void post_blankName_returns400() throws Exception {
-        mvc.perform(post("/api/agences")
+        mvc.perform(post("/agences")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"nom\":\"\",\"ville\":\"Tunis\"}"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Bad Request"))
+                .andExpect(jsonPath("$.message").value(containsString("nom")))
+                .andExpect(jsonPath("$.path").value("/agences"))
+                .andExpect(jsonPath("$.timestamp").exists());
 
-        verify(service, never()).add(any());
+        verify(service, never()).create(any());
     }
 
     @Test
     void delete_existing_returns204() throws Exception {
-        mvc.perform(delete("/api/agences/1"))
+        mvc.perform(delete("/agences/1"))
                 .andExpect(status().isNoContent());
 
-        verify(service).remove(1L);
+        verify(service).deleteById(1L);
     }
 }

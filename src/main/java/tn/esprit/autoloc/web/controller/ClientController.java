@@ -7,9 +7,9 @@ import tn.esprit.autoloc.domain.Client;
 import tn.esprit.autoloc.service.IClientService;
 
 @RestController
-@RequestMapping("/api/clients")
+@RequestMapping("/clients")
 @Tag(name = "Clients", description = "Gestion des clients")
-public class ClientController extends AbstractCrudController<Client> {
+public class ClientController extends AbstractCrudController<Client, Long> {
 
     public ClientController(IClientService service) {
         super(service);

@@ -7,9 +7,9 @@ import tn.esprit.autoloc.domain.Reservation;
 import tn.esprit.autoloc.service.IReservationService;
 
 @RestController
-@RequestMapping("/api/reservations")
+@RequestMapping("/reservations")
 @Tag(name = "Reservations", description = "Gestion des réservations")
-public class ReservationController extends AbstractCrudController<Reservation> {
+public class ReservationController extends AbstractCrudController<Reservation, Long> {
 
     public ReservationController(IReservationService service) {
         super(service);

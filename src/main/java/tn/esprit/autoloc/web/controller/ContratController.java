@@ -7,9 +7,9 @@ import tn.esprit.autoloc.domain.Contrat;
 import tn.esprit.autoloc.service.IContratService;
 
 @RestController
-@RequestMapping("/api/contrats")
+@RequestMapping("/contrats")
 @Tag(name = "Contrats", description = "Gestion des contrats")
-public class ContratController extends AbstractCrudController<Contrat> {
+public class ContratController extends AbstractCrudController<Contrat, Long> {
 
     public ContratController(IContratService service) {
         super(service);

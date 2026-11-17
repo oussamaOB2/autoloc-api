@@ -1,6 +1,11 @@
 package tn.esprit.autoloc.service;
 
+import tn.esprit.autoloc.calcul.VehiculeOffre;
 import tn.esprit.autoloc.domain.Agence;
 
-public interface IAgenceService extends ICrudService<Agence> {
+public interface IAgenceService extends IGenericService<Agence, Long> {
+
+    boolean hasVehicules(Long id);
+
+    String simuler(Long idAgence, int jours, VehiculeOffre offre);
 }

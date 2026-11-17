@@ -7,9 +7,9 @@ import tn.esprit.autoloc.domain.Maintenance;
 import tn.esprit.autoloc.service.IMaintenanceService;
 
 @RestController
-@RequestMapping("/api/maintenances")
+@RequestMapping("/maintenances")
 @Tag(name = "Maintenances", description = "Gestion des maintenances")
-public class MaintenanceController extends AbstractCrudController<Maintenance> {
+public class MaintenanceController extends AbstractCrudController<Maintenance, Long> {
 
     public MaintenanceController(IMaintenanceService service) {
         super(service);

@@ -7,9 +7,9 @@ import tn.esprit.autoloc.domain.Equipement;
 import tn.esprit.autoloc.service.IEquipementService;
 
 @RestController
-@RequestMapping("/api/equipements")
+@RequestMapping("/equipements")
 @Tag(name = "Equipements", description = "Gestion des équipements")
-public class EquipementController extends AbstractCrudController<Equipement> {
+public class EquipementController extends AbstractCrudController<Equipement, Long> {
 
     public EquipementController(IEquipementService service) {
         super(service);

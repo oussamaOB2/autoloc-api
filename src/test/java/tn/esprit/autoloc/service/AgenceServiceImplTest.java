@@ -24,54 +24,58 @@ class AgenceServiceImplTest {
     AgenceServiceImpl service;
 
     @Test
-    void retrieve_existing_returnsAgence() {
+    void findById_existing_returnsAgence() {
         Agence a = new Agence();
         a.setIdAgence(1L);
         when(repository.findById(1L)).thenReturn(Optional.of(a));
 
-        assertSame(a, service.retrieve(1L));
+        assertSame(a, service.findById(1L));
     }
 
     @Test
-    void retrieve_missing_throwsResourceNotFound() {
+    void findById_missing_throwsResourceNotFound() {
         when(repository.findById(99L)).thenReturn(Optional.empty());
 
         ResourceNotFoundException ex =
-                assertThrows(ResourceNotFoundException.class, () -> service.retrieve(99L));
+                assertThrows(ResourceNotFoundException.class, () -> service.findById(99L));
         assertEquals("Agence introuvable avec l'id 99", ex.getMessage());
     }
 
     @Test
-    void add_withBlankName_throwsIllegalArgument() {
+    void create_withBlankName_throwsIllegalArgument() {
         Agence a = new Agence();
         a.setNom("  ");
 
-        assertThrows(IllegalArgumentException.class, () -> service.add(a));
+        assertThrows(IllegalArgumentException.class, () -> service.create(a));
         verify(repository, never()).save(any());
     }
 
     @Test
-    void modify_missingId_throwsResourceNotFound() {
-        Agence a = new Agence(); // id == null
+    void update_missingId_throwsResourceNotFound() {
+        when(repository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> service.modify(a));
+        assertThrows(ResourceNotFoundException.class, () -> service.update(99L, new Agence()));
         verify(repository, never()).save(any());
     }
 
     @Test
-    void remove_existing_deletes() {
-        when(repository.existsById(1L)).thenReturn(true);
+    void deleteById_existing_deletes() {
+        Agence a = new Agence();
+        a.setIdAgence(1L);
+        when(repository.findById(1L)).thenReturn(Optional.of(a));
 
-        service.remove(1L);
+        service.deleteById(1L);
 
-        verify(repository).deleteById(1L);
+        verify(repository).delete(a);
+        verify(repository).flush();
     }
 
     @Test
-    void remove_missing_throwsResourceNotFound() {
-        when(repository.existsById(5L)).thenReturn(false);
+    void deleteById_missing_throwsResourceNotFound() {
+        when(repository.findById(5L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> service.remove(5L));
-        verify(repository, never()).deleteById(any());
+        assertThrows(ResourceNotFoundException.class, () -> service.deleteById(5L));
+        verify(repository, never()).delete(any());
+        verify(repository, never()).flush();
     }
 }

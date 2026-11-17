@@ -5,9 +5,27 @@ import tn.esprit.autoloc.domain.Paiement;
 import tn.esprit.autoloc.repository.IPaiementRepository;
 
 @Service
-public class PaiementServiceImpl extends AbstractCrudService<Paiement> implements IPaiementService {
+public class PaiementServiceImpl extends GenericServiceImpl<Paiement, Long> implements IPaiementService {
 
     public PaiementServiceImpl(IPaiementRepository repository) {
-        super(repository, "Paiement", Paiement::getIdPaiement);
+        super(repository);
+    }
+
+    @Override
+    protected String getEntityName() {
+        return "Paiement";
+    }
+
+    @Override
+    protected Long getId(Paiement entity) {
+        return entity.getIdPaiement();
+    }
+
+    @Override
+    protected void setFields(Paiement source, Paiement target) {
+        target.setMontant(source.getMontant());
+        target.setDatePaiement(source.getDatePaiement());
+        target.setModePaiement(source.getModePaiement());
+        target.setContrat(source.getContrat());
     }
 }
