@@ -7,6 +7,7 @@ import tn.esprit.autoloc.Utils;
 import tn.esprit.autoloc.calcul.VehiculeOffre;
 import tn.esprit.autoloc.domain.Agence;
 import tn.esprit.autoloc.domain.Vehicule;
+import tn.esprit.autoloc.io.RapportFactory;
 import tn.esprit.autoloc.repository.IAgenceRepository;
 
 @Service
@@ -14,11 +15,14 @@ import tn.esprit.autoloc.repository.IAgenceRepository;
 public class AgenceServiceImpl extends GenericServiceImpl<Agence, Long> implements IAgenceService {
 
     private final IVehiculeService vehiculeService;                  // 1. NEW: the field
-
+    private final RapportFactory rapportFactory;                     // SRP (etape 11) : la construction
+                                                                     // du rapport n'est plus ici
     public AgenceServiceImpl(IAgenceRepository repository,
-                             IVehiculeService vehiculeService) {     // 2. NEW: the parameter
+                             IVehiculeService vehiculeService,       // 2. NEW: the parameter
+                             RapportFactory rapportFactory) {
         super(repository);
         this.vehiculeService = vehiculeService;                      // 3. NEW: the assignment
+        this.rapportFactory = rapportFactory;
     }
 
     @Override
@@ -58,15 +62,12 @@ public class AgenceServiceImpl extends GenericServiceImpl<Agence, Long> implemen
         }
         Agence agence = findById(idAgence);
 
-        StringBuilder rapport = new StringBuilder();
-        rapport.append(String.format("Agence #%d - %s - Tél : %s%n",
-                agence.getIdAgence(), agence.getNom(), agence.getTelephone()));
-
         double total = 0;
         for (Vehicule v : agence.getVehicules()) {
             total += vehiculeService.calculTarif(v, jours, offre);
         }
-        rapport.append("total tarif:" + total + "\n");
-        return rapport.toString();
+        // Fabrique (etape 14) : type choisi ici, pas en parametre — signature simuler inchangée.
+        // « CONSOLE » imprime l'en-tête sur la console et retourne le texte avec le total.
+        return rapportFactory.getRapport("CONSOLE").construire(agence, total);
     }
 }
