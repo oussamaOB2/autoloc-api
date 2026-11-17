@@ -55,7 +55,7 @@ class AgenceSimulerRegressionTest {
                 "STANDARD", new StandardOffreStrategy(),
                 "WEEKEND", new WeekendOffreStrategy(),
                 "LONGUE_DUREE", new LongueDureeOffreStrategy()));
-        return new AgenceServiceImpl(agenceRepo, vehiculeService, factory);
+        return new AgenceServiceImpl(agenceRepo, vehiculeService, factory, mock(IEmployeService.class));
     }
 
     @Test

@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tn.esprit.autoloc.Utils;
 import tn.esprit.autoloc.calcul.VehiculeOffre;
 import tn.esprit.autoloc.domain.Agence;
+import tn.esprit.autoloc.domain.Employe;
 import tn.esprit.autoloc.domain.Vehicule;
 import tn.esprit.autoloc.io.RapportFactory;
 import tn.esprit.autoloc.repository.IAgenceRepository;
@@ -17,12 +18,17 @@ public class AgenceServiceImpl extends GenericServiceImpl<Agence, Long> implemen
     private final IVehiculeService vehiculeService;                  // 1. NEW: the field
     private final RapportFactory rapportFactory;                     // SRP (etape 11) : la construction
                                                                      // du rapport n'est plus ici
+    private final IEmployeService employeService;                    // etape 12 : création des employés
+                                                                     // (pas de cycle : EmployeServiceImpl
+                                                                     // n'injecte qu'un repository)
     public AgenceServiceImpl(IAgenceRepository repository,
                              IVehiculeService vehiculeService,       // 2. NEW: the parameter
-                             RapportFactory rapportFactory) {
+                             RapportFactory rapportFactory,
+                             IEmployeService employeService) {
         super(repository);
         this.vehiculeService = vehiculeService;                      // 3. NEW: the assignment
         this.rapportFactory = rapportFactory;
+        this.employeService = employeService;
     }
 
     @Override
@@ -46,6 +52,34 @@ public class AgenceServiceImpl extends GenericServiceImpl<Agence, Long> implemen
     @Override
     public boolean check(Agence agence, boolean isNew) {
         return agence != null && Utils.isNotEmpty(agence.getNom());
+    }
+
+    /**
+     * Atelier 9, étapes 12-18 : mise à jour d'une agence avec ajout d'employés.
+     * <p>
+     * Étape 17 : {@code @Transactional} englobe la mise à jour, les insertions d'employés
+     * ({@code create} en runtime REQUIRED rejoignent la transaction) et {@code setEffectif} —
+     * la première exception (employé invalide) annule tout (rollback par défaut sur RuntimeException).
+     * Appelé via le proxy Spring (pas d'auto-involution depuis la même classe).
+     */
+    @Override
+    @Transactional
+    public Agence updateAvecEmployes(Long idAgence, Agence source) {
+        if (source == null) {
+            throw new IllegalArgumentException("Agence source obligatoire");
+        }
+        // setFields ne copie que les scalaires (nom, ville, ...) : employes/effectif ignorés ici.
+        Agence agence = update(idAgence, source);
+        if (source.getEmployes() != null) {
+            for (Employe employe : source.getEmployes()) {
+                // symétrie (étape 10) : fixe employe.agence, le côté propriétaire, AVANT l'insert.
+                agence.addEmploye(employe);
+                employeService.create(employe);   // check de l'employé : rejet si nom absent
+            }
+            agence.setEffectif(source.getEmployes().size());
+            repository.save(agence);
+        }
+        return agence;
     }
 
     @Override
